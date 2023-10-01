@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'web/styles.css' %}">
+    <meta charset="UTF-8">
+    <title>About – Letovo Lab Help</title>
+</head>
+<body>
+    <div class="outer">
+        <img src="{% static 'web/letovolablogo.png' %}" style="width: 200px; height: 77px; user-select: none;">
+        <form action="/main">
+            <input type="submit" class="toolbar" value="Main">
+        </form>
+        <form action="/about">
+            <input type="submit" class="toolbar" value="About">
+        </form>
+    </div>
+    <p class="header">About Letovo Lab Help</p>
+    <div style="padding: 0% 10% 0% 10%"> This website was created for the Letovo School IB DP Science department to simplify
+        and centralize the process of creating and approving SEAF and RAF forms.<br><br>
+        Forms created by a student are approved by a teacher, a lab assistant, a safety inspector and
+        a department director (separately for SEAF and RAF forms).
+        Non-student users will additionally have to be approved by a personnel member after the registration.
+        There is also an "IT inspector" role to change users' passwords to Letovo Account ones.<br><br>
+        To embed a form in Letovo Canvas, input the following as HTML code:<br>
+        <i style="font-size: 80%;">&lt;iframe frameborder="1" src="[Paste the form URL here, without square brackets]"
+            width="700" height="700"&gt;&lt;/iframe&gt;</i><br><br>
+        The website was created by a Letovo School student as an "ИВР" project.
+        Report any bugs or suggest features to this email: <a href="mailto:letovolabprojecthelp@gmail.com">
+            letovolabprojecthelp@gmail.com</a> (this is the address that is used to send equipment notifications)<br><br>
+        What you're currently looking at is, most likely, not final, and will be updated at some point.<br>
+        Planned updates roadmap:<br>
+        <ul type="circle">
+            <li>Add a "table" feature that displays info about all forms</li>
+            <li>Automatically send a PDF with the information about the lab study</li>
+            <li>Make editing form questions possible</li>
+            <li>Separate approving forms, approving users, etc. into separate tabs</li>
+            <li>Add an option to notify users about new forms</li>
+            <li>Add an option to set your grade in settings, so it is not necessary to set it in the form</li>
+        </ul>
+    </div>
+    <form action="/main/" style="text-align: center">
+        <input type="submit" style="text-align: center" value="Back to main" />
+    </form>
+</body>
+</html>

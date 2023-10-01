@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'web/styles.css' %}">
+    <meta charset="UTF-8">
+    <title>Register – Letovo Lab Help</title>
+</head>
+<body>
+    <div class="outer">
+        <img src="{% static 'web/letovolablogo.png' %}" style="width: 200px; height: 77px;">
+        <form action="/main">
+            <input type="submit" class="toolbar" value="Main">
+        </form>
+        <form action="/about">
+            <input type="submit" class="toolbar" value="About">
+        </form>
+    </div>
+    <p class="header">Register</p>
+    <form action="/password-sent/" style="text-align: center" method="post">
+        {% csrf_token %}
+
+        <label for="email">Email:</label><br>
+        <input type="text" id="email" name="email"><br><br>
+
+        <label for="first_name">First name:</label><br>
+        <input type="text" id="first_name" name="first_name"><br><br>
+
+        <label for="last_name">Last name:</label><br>
+        <input type="text" id="last_name" name="last_name"><br><br>
+
+        <label for="role">Role:</label><br>
+        <select name="role" id="role"><br><br>
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+            <option value="labassist">Lab assistant</option>
+            <option value="safety">Safety inspector</option>
+            <option value="director">Department director</option>
+            <option value="inspector">IT inspector</option>
+        </select><br><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

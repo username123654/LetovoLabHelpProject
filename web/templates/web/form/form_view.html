@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'web/styles.css' %}">
+    <meta charset="UTF-8">
+    <title>{{ form_type }} form – Letovo Lab Help</title>
+</head>
+<body>
+    <div class="outer">
+        <img src="{% static 'web/letovolablogo.png' %}" style="width: 200px; height: 77px; user-select: none;">
+        <input type="submit" class="toolbar" value="Main">
+        <input type="submit" class="toolbar" value="About">
+        </form>
+    </div>
+    <p class="header">{{ form_type }} form (by {{ form_fn }} {{ form_ln }})</p>
+    <form style="padding-left: 10px;" action="/form-sent/{{ form_id }}/" method="post">
+        {% csrf_token %}
+    {% for q in question_list %}
+        <div style="padding-top: 10px; padding-bottom: 10px;">{{ q.question }}
+        {% if q.is_necessary == True %}<span style="color: red">*</span>{% endif %}</div>
+        {% if q.tooltip != "-" %}
+            <div style="font-size: 80%;">{{ q.tooltip }}</div><br>
+        {% endif %}
+        {% if q.is_text == False and q.is_choice == False %}
+                {% csrf_token %}
+                <input type="text" id="{{ q.pk }}" name="{{ q.pk }}"><br><br>
+        {% endif %}
+        {% if q.is_choice == True %}
+                <input type="text" id="{{ q.pk }}" name="{{ q.pk }}"><br><br>
+        {% endif %}
+    {% endfor %}
+        <input type="submit" value="Submit"><br>
+    </form>
+</body>
+</html>

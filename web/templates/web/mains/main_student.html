@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'web/styles.css' %}">
+    <meta charset="UTF-8">
+    <title>Main page – Letovo Lab Help</title>
+</head>
+<body>
+    <div class="outer">
+        <img src="{% static 'web/letovolablogo.png' %}" style="width: 200px; height: 77px;">
+        <form action="/main">
+            <input type="submit" class="toolbar" value="Main">
+        </form>
+        <form action="/about">
+            <input type="submit" class="toolbar" value="About">
+        </form>
+        <form action="/logout">
+            <input type="submit" class="toolbar" value="Log out">
+        </form>
+    </div>
+    <div class="outer" style="width: 100%; margin-top: 30px;">
+        <form action="/form-created/SEAF" style="width: 50%; display: inline; text-align: right;">
+            <input type="submit" value="New SEAF form">
+        </form>
+        <form action="/form-created/RAF" style="width: 50%; display: inline; text-align: left;">
+            <input type="submit" value="New RAF form">
+        </form>
+    </div>
+    <p class="header">Your forms</p>
+    {% if not form_list %}
+        <hr>
+        <p><i>Nothing here yet</i></p>
+    {% endif %}
+    {% for f in form_list %}
+        <hr>
+        <p>{{ f.type }}, {{ f.person.first_name }} {{ f.person.last_name }},  {{ f.date }}</p>
+        <form action="/form/{{ f.id }}">
+            <input type="submit" value="View form" />
+        </form>
+    {% endfor %}
+</body>
+</html>

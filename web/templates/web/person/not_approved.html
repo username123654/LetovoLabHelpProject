@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'web/styles.css' %}">
+    <meta charset="UTF-8">
+    <title>Not approved – Letovo Lab Help</title>
+</head>
+<body>
+    <div class="outer">
+        <img src="{% static 'web/letovolablogo.png' %}" style="width: 200px; height: 77px; user-select: none;">
+        <form action="/main">
+            <input type="submit" class="toolbar" value="Main">
+        </form>
+        <form action="/about">
+            <input type="submit" class="toolbar" value="About">
+        </form>
+    </div>
+    <p class="header">Your account is not approved yet</p>
+    <p style="text-align: center">Please wait for a personnel member to approve your account</p>
+</body>
+</html>

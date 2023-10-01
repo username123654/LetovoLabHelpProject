@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'web/styles.css' %}">
+    <meta charset="UTF-8">
+    <title>Person approved – Letovo Lab Help</title>
+</head>
+<body>
+    <div class="outer">
+        <img src="{% static 'web/letovolablogo.png' %}" style="width: 200px; height: 77px; user-select: none;">
+        <form action="/main">
+            <input type="submit" class="toolbar" value="Main">
+        </form>
+        <form action="/about">
+            <input type="submit" class="toolbar" value="About">
+        </form>
+    </div>
+    <p class="header">Person approved successfully</p>
+    <form style="text-align: center" action="/main/" style="text-align: center">
+        <input type="submit" value="Back to main" />
+    </form>
+</body>
+</html>

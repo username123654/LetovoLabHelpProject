@@ -1,0 +1,62 @@
+body {
+    font-size: 120%;
+    font-family: verdana; sans-serif;
+}
+
+p {
+    padding: 10px;
+}
+
+hr {
+    background-color: #999999;
+    width: 90%;
+    height: 0.5px;
+    border: 0px;
+}
+
+input[type=submit] {
+  background-color: #999999;
+  border: none;
+  color: white;
+  padding: 10px 10px;
+  margin: 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+}
+
+input[type=submit]:hover {
+  background-color: #777777;
+}
+
+a:visited {
+  color: orange;
+}
+
+.header {
+  text-align: center;
+  font-size: 30px;
+}
+
+.outer
+{
+    display: flex;
+    width: 100%;
+}
+
+.toolbar
+{
+    background-color: #FFFFFF !important;
+    border-bottom: solid 0.5px #999999 !important;
+    color: #999999 !important;
+    font-size: 120%;
+    padding: 20px 20px !important;
+    margin: 5px 5px !important;
+}
+
+.toolbar:hover
+{
+    background-color: #FFFFFF !important;
+    border-bottom: solid 0.5px #777777 !important;
+    color: #777777 !important;
+}

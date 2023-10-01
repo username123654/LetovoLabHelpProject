@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'web/styles.css' %}">
+    <meta charset="UTF-8">
+    <title>Main page – Letovo Lab Help</title>
+</head>
+<body>
+    <div class="outer">
+        <img src="{% static 'web/letovolablogo.png' %}" style="width: 200px; height: 77px;">
+        <form action="/main">
+            <input type="submit" class="toolbar" value="Main">
+        </form>
+        <form action="/about">
+            <input type="submit" class="toolbar" value="About">
+        </form>
+        <form action="/logout">
+            <input type="submit" class="toolbar" value="Log out">
+        </form>
+    </div>
+    <p class="header">SEAF forms to approve</p>
+    {% if not form_list_seaf %}
+        <hr>
+        <i style="padding: 10px 20% 0 0;">Nothing here yet</i>
+    {% endif %}
+    {% for f in form_list_seaf %}
+        <hr>
+        <p>{{ f.type }}, {{ f.person.first_name }} {{ f.person.last_name }},  {{ f.date }}</p>
+        <div class="outer">
+            <form action="/form/{{ f.id }}">
+                <input type="submit" value="View form" />
+            </form>
+            <form action="/form-approved/{{ f.id }}">
+                <input type="submit" value="Approve" />
+            </form>
+            <form action="/form-disapproved/{{ f.id }}">
+                <input type="submit" value="Disapprove and comment" />
+            </form>
+        </div>
+    {% endfor %}
+
+    <p class="header">RAF forms to approve</p>
+    {% if not form_list_raf %}
+        <hr>
+        <p><i>Nothing here yet</i></p>
+    {% endif %}
+    {% for f in form_list_far %}
+        <hr>
+        <p>{{ f.type }}, {{ f.person.first_name }} {{ f.person.last_name }},  {{ f.date }}</p>
+        <div class="outer">
+            <form action="/form/{{ f.id }}">
+                <input type="submit" value="View form" />
+            </form>
+            <form action="/form-approved/{{ f.id }}">
+                <input type="submit" value="Approve" />
+            </form>
+            <form action="/form-disapproved/{{ f.id }}">
+                <input type="submit" value="Disapprove and comment" />
+            </form>
+        </div>
+    {% endfor %}
+
+    <p class="header">Users to approve</p>
+    {% if not app_person_list %}
+        <hr>
+        <p><i>Nothing here yet</i></p>
+    {% endif %}
+    {% for p in app_person_list %}
+        <hr>
+        <p>{{ p.first_name }} {{ p.last_name }}, {% if p.role == "student" %}Student
+            {% elif p.role == "teacher" %}Teacher
+            {% elif p.role == "safety" %}Safety inspector
+            {% elif p.role == "director" %}Director
+            {% elif p.role == "labassist" %}Lab assistant
+            {% elif p.role == "inspector" %}IT inspector
+            {% else %}???{% endif %}</p>
+        <div class="outer">
+            <form action="/person-approved/{{ p.pk }}/">
+                <input type="submit" value="Approve user" />
+            </form>
+            <form action="/person-deleted/{{ p.pk }}/">
+                <input type="submit" value="Disapprove (delete) user" />
+            </form>
+        </div>
+    {% endfor %}
+</body>
+</html>

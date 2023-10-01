@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'web/styles.css' %}">
+    <meta charset="UTF-8">
+    <title>Successful registration – Letovo Lab Help</title>
+</head>
+<body>
+    <div class="outer">
+        <img src="{% static 'web/letovolablogo.png' %}" style="width: 200px; height: 77px;">
+        <form action="/main">
+            <input type="submit" class="toolbar" value="Main">
+        </form>
+        <form action="/about">
+            <input type="submit" class="toolbar" value="About">
+        </form>
+    </div>
+    <p class="header">Password has been sent to your email<br>If you don't see it, check the spam folder</p>
+    <form action="/login" style="display: inline">
+        <div style="text-align: center">
+            <input type="submit" value="Login">
+        </div>
+    </form>
+</body>
+</html>
