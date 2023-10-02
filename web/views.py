@@ -10,6 +10,7 @@ from django.db.models import Q
 
 import datetime
 import yagmail
+from keyring import get_keyring
 
 from .models import Form, FormQuestion, FormAnswer, ContentChoice, Comment, Person
 
@@ -381,6 +382,7 @@ def after_register(request):
             user_full = Person(user=user, role=role, first_name=first_name, last_name=last_name, temp_password=False,
                                approved=False)
             user_full.save()
+            get_keyring()
             yagmail.register('letovolabprojecthelp@gmail.com', 'hgsf atlj wybo eejo')
             test_email = yagmail.SMTP('letovolabprojecthelp@gmail.com', 'hgsf atlj wybo eejo')
             content = ['Your password: ' + password + '\nIt is temporary and will be changed later']
