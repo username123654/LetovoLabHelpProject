@@ -57,4 +57,4 @@ class Person(models.Model):
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     approved = models.BooleanField()
-    temp_password = models.BooleanField()
+    temp_password = models.BooleanField()    # means that the password ISN'T temporary

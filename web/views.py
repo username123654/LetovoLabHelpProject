@@ -277,7 +277,8 @@ def after_register(request):
         except User.DoesNotExist:
             user = User.objects.create_user(email, email, password)
             user.save()
-            user_full = Person(user=user, role=role, first_name=first_name, last_name=last_name, temp_password=True)
+            user_full = Person(user=user, role=role, first_name=first_name, last_name=last_name, temp_password=False,
+                               approved=False)
             user_full.save()
             yagmail.register('letovolabprojecthelp@gmail.com', 'hgsf atlj wybo eejo')
             test_email = yagmail.SMTP('letovolabprojecthelp@gmail.com', 'hgsf atlj wybo eejo')
