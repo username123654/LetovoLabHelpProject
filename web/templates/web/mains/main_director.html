@@ -23,7 +23,7 @@
     <p class="header">SEAF forms to approve</p>
     {% if not form_list_seaf %}
         <hr>
-        <i style="padding: 10px 20% 0 0;">Nothing here yet</i>
+        <p><i>Nothing here yet</i></p>
     {% endif %}
     {% for f in form_list_seaf %}
         <hr>
@@ -46,7 +46,7 @@
         <hr>
         <p><i>Nothing here yet</i></p>
     {% endif %}
-    {% for f in form_list_far %}
+    {% for f in form_list_raf %}
         <hr>
         <p>{{ f.type }}, {{ f.person.first_name }} {{ f.person.last_name }},  {{ f.date }}</p>
         <div class="outer">

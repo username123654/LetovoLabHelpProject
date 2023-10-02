@@ -16,39 +16,55 @@ class Form(models.Model):
     approved_director = models.BooleanField()  # both SEAF and RAF
     approved_safety = models.BooleanField()  # for RAF
 
+    def __str__(self):
+        return str(self.is_main) + " " + self.type + ", " + self.person.first_name + " " + self.person.last_name +\
+               ", " + str(self.date)
+
 
 class FormInfo(models.Model):
     type = models.CharField(max_length=100)  # either SEAF or RAF
     date_created = models.DateTimeField('date published')
     date_lab = models.DateTimeField()
     person = models.ForeignKey("Person", on_delete=models.CASCADE)
-    comment = models.CharField(max_length=1000)
+    comment = models.TextField(max_length=1000)
 
 
 class FormQuestion(models.Model):
     order = models.IntegerField()
     form = models.ForeignKey("Form", on_delete=models.CASCADE)
-    question = models.CharField(max_length=1000)
-    tooltip = models.CharField(max_length=1000)
+    question = models.TextField(max_length=1000)
+    tooltip = models.TextField(max_length=1000)
     is_choice = models.BooleanField()
     is_text = models.BooleanField()
     is_necessary = models.BooleanField()
 
+    def __str__(self):
+        return self.question
+
 
 class FormAnswer(models.Model):
     question = models.ForeignKey("FormQuestion", on_delete=models.CASCADE)
-    value = models.CharField(max_length=1000)
+    value = models.TextField(max_length=1000)
+
+    def __str__(self):
+        return self.value
 
 
 class ContentChoice(models.Model):
     text = models.CharField(max_length=2000)
     question = models.ForeignKey("FormQuestion", on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.text
+
 
 class Comment(models.Model):
-    text = models.CharField(max_length=2000)
+    text = models.TextField(max_length=2000)
     form = models.ForeignKey("Form", on_delete=models.CASCADE)
     person = models.ForeignKey("Person", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.text
 
 
 class Person(models.Model):
@@ -58,3 +74,6 @@ class Person(models.Model):
     last_name = models.CharField(max_length=200)
     approved = models.BooleanField()
     temp_password = models.BooleanField()    # means that the password ISN'T temporary
+
+    def __str__(self):
+        return self.first_name + " " + self.last_name

@@ -17,20 +17,27 @@
     <p class="header">{{ form_type }} form (by {{ form_fn }} {{ form_ln }})</p>
     <form style="padding-left: 10px;" action="/form-sent/{{ form_id }}/" method="post">
         {% csrf_token %}
-    {% for q in question_list %}
-        <div style="padding-top: 10px; padding-bottom: 10px;">{{ q.question }}
-        {% if q.is_necessary == True %}<span style="color: red">*</span>{% endif %}</div>
-        {% if q.tooltip != "-" %}
-            <div style="font-size: 80%;">{{ q.tooltip }}</div><br>
-        {% endif %}
-        {% if q.is_text == False and q.is_choice == False %}
-                {% csrf_token %}
-                <input type="text" id="{{ q.pk }}" name="{{ q.pk }}"><br><br>
-        {% endif %}
-        {% if q.is_choice == True %}
-                <input type="text" id="{{ q.pk }}" name="{{ q.pk }}"><br><br>
-        {% endif %}
-    {% endfor %}
+        {% for qc, is_question, is_c_start, is_c_end in question_choice_list %}
+            {% if is_question is 1 %}
+                <div style="padding-top: 10px; padding-bottom: 10px;">{{ qc.question|linebreaksbr }}
+                {% if qc.is_necessary == 1 %}<span style="color: red">*</span>{% endif %}</div>
+
+                {% if qc.tooltip != "-" %}
+                    <div style="font-size: 80%;">{{ qc.tooltip }}</div><br>
+                {% endif %}
+
+                {% if qc.is_text == 0 and qc.is_choice == 0 %}
+                    <input type="text" id="{{ qc.pk }}" name="{{ qc.pk }}"><br><br>
+                {% endif %}
+
+            {% elif is_c_start is 1 %}
+                <select name="{{ qc.pk }}" id="{{ qc.pk }}"><br><br>
+            {% elif is_c_end is 1 %}
+                </select><br><br>
+            {% else %}
+                <option value="{{ qc.pk }}">{{ qc.text }}</option>
+            {% endif %}
+        {% endfor %}
         <input type="submit" value="Submit"><br>
     </form>
 </body>

@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate
 from django.shortcuts import redirect
 from django.contrib.auth import login, logout
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.db.models import Q
 
 import datetime
 import yagmail
@@ -18,47 +19,47 @@ def index(request):
 
 
 def main(request):
-    if not request.user.is_authenticated:    # MAIN NO LOGIN (LOGIN BUTTON)
+    if not request.user.is_authenticated:  # MAIN NO LOGIN (LOGIN BUTTON)
         return render(request, 'web/mains/main_nologin.html', {})
 
-    elif request.user.person.role != "student" and request.user.person.approved is False:    # NOT APPROVED BY IT YET
+    elif request.user.person.role != "student" and request.user.person.approved is False:  # NOT APPROVED BY IT YET
         return redirect(not_approved)
 
-    elif request.user.person.role == "student":    # MAIN STUDENT (CREATE FORM, YOUR FORMS, NOTIFY LAB)
-        form_list = Form.objects.filter(person=Person.objects.get(user=request.user), is_main=False)
+    elif request.user.person.role == "student":  # MAIN STUDENT (CREATE FORM, YOUR FORMS, NOTIFY LAB)
+        form_list = Form.objects.filter(person=Person.objects.get(user=request.user), is_main=False, is_completed=False)
         return render(request, 'web/mains/main_student.html', {"form_list": form_list})
 
-    elif request.user.person.role == "teacher":    # MAIN TEACHER (APPROVE FORM, APPROVE USER)
+    elif request.user.person.role == "teacher":  # MAIN TEACHER (APPROVE FORM, APPROVE USER)
         form_list = Form.objects.filter(type="SEAF", approved_teacher=False, is_finished=False, is_completed=False)
-        app_person_list = Person.objects.filter(approved=False)
+        app_person_list = Person.objects.filter(~Q(role="student"), approved=False)
         return render(request, 'web/mains/main_teacher.html', {"form_list": form_list,
                                                                "app_person_list": app_person_list})
 
-    elif request.user.person.role == "labassist":    # MAIN LAB ASSISTANT (APPROVE FORM, END FORM, APPROVE USER)
-        form_list = Form.objects.filter(type="SEAF", approved_labassist=False, is_finished=False, is_completed=False)
+    elif request.user.person.role == "labassist":  # MAIN LAB ASSISTANT (APPROVE FORM, END FORM, APPROVE USER)
+        form_list = Form.objects.filter(type="SEAF", approved_labassist=False, is_finished=False)
         form_list_finish = Form.objects.filter(is_finished=True, is_completed=False)
-        app_person_list = Person.objects.filter(approved=False)
+        app_person_list = Person.objects.filter(~Q(role="student"), approved=False)
         return render(request, 'web/mains/main_labassist.html',
                       {"form_list": form_list, "form_list_finish": form_list_finish,
                        "app_person_list": app_person_list})
 
-    elif request.user.person.role == "safety":    # MAIN SAFETY INSPECTOR (APPROVE FORM, APPROVE USER)
+    elif request.user.person.role == "safety":  # MAIN SAFETY INSPECTOR (APPROVE FORM, APPROVE USER)
         form_list = Form.objects.filter(type="RAF", approved_safety=False)
-        app_person_list = Person.objects.filter(approved=False)
+        app_person_list = Person.objects.filter(~Q(role="student"), approved=False)
         return render(request, 'web/mains/main_safety.html', {"form_list": form_list,
                                                               "app_person_list": app_person_list})
 
-    elif request.user.person.role == "director":    # MAIN LAB DIRECTOR (APPROVE FORM TWICE, APPROVE USER)
+    elif request.user.person.role == "director":  # MAIN LAB DIRECTOR (APPROVE FORM TWICE, APPROVE USER)
         form_list_seaf = Form.objects.filter(type="SEAF", approved_director=False, is_completed=False)
         form_list_raf = Form.objects.filter(type="RAF", approved_director=False, is_completed=False)
-        app_person_list = Person.objects.filter(approved=False)
+        app_person_list = Person.objects.filter(~Q(role="student"), approved=False)
         return render(request, 'web/mains/main_director.html',
                       {"form_list_seaf": form_list_seaf, "form_list_raf": form_list_raf,
                        "app_person_list": app_person_list})
 
-    elif request.user.person.role == "inspector":    # MAIN IT INSPECTOR (CHANGE THE PASSWORD OF ACCOUNT, EDIT USER)
+    elif request.user.person.role == "inspector":  # MAIN IT INSPECTOR (CHANGE THE PASSWORD OF ACCOUNT, EDIT USER)
         person_list = Person.objects.filter(temp_password=False)
-        app_person_list = Person.objects.filter(approved=False)
+        app_person_list = Person.objects.filter(~Q(role="student"), approved=False)
         all_person_list = Person.objects.filter()
         forms_list = Form.objects.filter()
         return render(request, 'web/mains/main_inspector.html', {"person_list": person_list,
@@ -66,7 +67,7 @@ def main(request):
                                                                  "all_person_list": all_person_list,
                                                                  "forms_list": forms_list})
 
-    else:    # LOGIN ERROR (LOGIN BUTTON, JUST IN CASE)
+    else:  # LOGIN ERROR (LOGIN BUTTON, JUST IN CASE)
         request.session['error_page_title'] = 'No permission'
         request.session['error_page_content'] = 'You have no permission to view this page'
         return redirect(error_general)
@@ -75,6 +76,8 @@ def main(request):
 def create_question(request):
     if not request.user.is_authenticated:
         return render(request, 'web/mains/main_nologin.html', {})
+    elif request.user.person.role != "student" and request.user.person.approved is False:
+        return redirect(not_approved)
     elif request.user.person.role != "director":
         request.session['error_page_title'] = 'No permission'
         request.session['error_page_content'] = 'You have no permission to view this page'
@@ -87,28 +90,54 @@ def create_question(request):
 def form_view(request, form_id):
     form_type = Form.objects.get(pk=form_id).type
     main_form_id = 1
-    if form_type is "RAF":
+    if form_type == "RAF":
         main_form_id = 2
-    question_list = FormQuestion.objects.filter(form=Form.objects.get(pk=main_form_id)).order_by('order')
-    is_choice_list = [i.is_choice for i in question_list]
-    is_text_list = [i.is_choice for i in question_list]
-    choice_list = [ContentChoice.objects.filter(question=i) for i in question_list]
+    question_choice_list = []
+    for i in FormQuestion.objects.filter(form=Form.objects.get(pk=main_form_id)).order_by('order'):
+        question_choice_list.append([i, 1, 0, 0])
+        if i.is_choice:
+            question_choice_list.append([i, 0, 1, 0])
+            for j in ContentChoice.objects.filter(question=i):
+                question_choice_list.append([j, 0, 0, 0])
+            question_choice_list.append([i, 0, 0, 1])
+    print(question_choice_list)
     form_fn = Form.objects.get(pk=form_id).person.first_name
     form_ln = Form.objects.get(pk=form_id).person.last_name
-    return render(request, 'web/form/form_view.html', {"question_list": question_list,
-                  "is_choice_list": is_choice_list, "is_text_list": is_text_list, "choice_list": choice_list,
-                  "form_id": form_id, "form_type": form_type, "form_fn": form_fn, "form_ln": form_ln})
+    return render(request, 'web/form/form_view.html', {"question_choice_list": question_choice_list,
+                                                       "form_id": form_id, "form_type": form_type, "form_fn": form_fn,
+                                                       "form_ln": form_ln})
 
 
 @xframe_options_exempt
 def form_sent(request, form_id):
-    if not request.user.is_authenticated:
-        return render(request, 'web/mains/main_nologin.html', {})
-    elif request.user.person.role != "student":
-        request.session['error_page_title'] = 'No permission'
-        request.session['error_page_content'] = 'You have no permission to view this page'
-        return redirect(error_general)
+    if request.method == 'POST':
+        form_type = Form.objects.get(pk=form_id).type
+        main_form_id = 1
+        if form_type == "RAF":
+            main_form_id = 2
+        form_list = FormQuestion.objects.filter(form=Form.objects.get(pk=main_form_id)).order_by('order')
+        for i in form_list:
+            if i.is_necessary and request.POST.get(str(i.pk)) is None:
+                request.session['error_page_title'] = 'Empty answer'
+                request.session['error_form'] = form_id
+                request.session['error_page_content'] = 'Some of the necessary questions weren\'t answered'
+                return redirect(error_form)
+        try:
+            for i in form_list:
+                if i.is_text or request.POST.get(str(i.pk)) is None:
+                    continue
+                answer = FormAnswer(question=i, value=request.POST.get(str(i.pk)))
+                answer.save()
+        except:
+            request.session['error_page_title'] = 'Error filling form'
+            request.session['error_form'] = form_id
+            request.session['error_page_content'] = 'Your form may have caused an error, try again'
+        print(form_list)
 
+    else:
+        request.session['error_page_title'] = 'No access'
+        request.session['error_page_content'] = 'You can\'t access this page right now'
+        return redirect(error_general)
     return render(request, 'web/form/form_sent.html', {})
 
 
@@ -135,17 +164,79 @@ def form_created(request, form_type):
 def form_approved(request, form_id):
     if not request.user.is_authenticated:
         return render(request, 'web/mains/main_nologin.html', {})
+
+    elif request.user.person.role != "student" and request.user.person.approved is False:
+        return redirect(not_approved)
+
     elif request.user.person.role == "student" or request.user.person.role == "inspector":
         request.session['error_page_title'] = 'No permission'
         request.session['error_page_content'] = 'You have no permission to view this page'
         return redirect(error_general)
 
+    elif request.user.person.role == "teacher":
+        form = Form.objects.get(pk=form_id)
+        form.approved_teacher = True
+        if form.type == "SEAF" and form.approved_labassist and form.approved_teacher and form.approved_director:
+            form.is_finished = True
+        if form.type == "RAF" and form.approved_safety and form.approved_director:
+            form.is_finished = True
+        form.save()
+        return render(request, 'web/form/form_approved.html', {})
+
+    elif request.user.person.role == "labassist":
+        form = Form.objects.get(pk=form_id)
+        form.approved_labassist = True
+        if form.type == "SEAF" and form.approved_labassist and form.approved_teacher and form.approved_director:
+            form.is_finished = True
+        if form.type == "RAF" and form.approved_safety and form.approved_director:
+            form.is_finished = True
+        form.save()
+        return render(request, 'web/form/form_approved.html', {})
+
+    elif request.user.person.role == "safety":
+        form = Form.objects.get(pk=form_id)
+        form.approved_safety = True
+        if form.type == "SEAF" and form.approved_labassist and form.approved_teacher and form.approved_director:
+            form.is_finished = True
+        if form.type == "RAF" and form.approved_safety and form.approved_director:
+            form.is_finished = True
+        form.save()
+        return render(request, 'web/form/form_approved.html', {})
+
+    elif request.user.person.role == "director":
+        form = Form.objects.get(pk=form_id)
+        form.approved_director = True
+        if form.type == "SEAF" and form.approved_labassist and form.approved_teacher and form.approved_director:
+            form.is_finished = True
+        if form.type == "RAF" and form.approved_safety and form.approved_director:
+            form.is_finished = True
+        form.save()
+        return render(request, 'web/form/form_approved.html', {})
+
     return render(request, 'web/form/form_approved.html', {})
 
 
-def form_disapproved(request, form_id):
+def form_finished(request, form_id):
     if not request.user.is_authenticated:
         return render(request, 'web/mains/main_nologin.html', {})
+    elif request.user.person.role != "student" and request.user.person.approved is False:
+        return redirect(not_approved)
+    elif request.user.person.role != "labassist":
+        request.session['error_page_title'] = 'No permission'
+        request.session['error_page_content'] = 'You have no permission to view this page'
+        return redirect(error_general)
+    else:
+        form = Form.objects.get(pk=form_id)
+        form.is_completed = True
+        form.save()
+        return render(request, 'web/form/form_finished.html', {})
+
+
+def form_disapproved(request, form_id):  # TODO
+    if not request.user.is_authenticated:
+        return render(request, 'web/mains/main_nologin.html', {})
+    elif request.user.person.role != "student" and request.user.person.approved is False:
+        return redirect(not_approved)
     elif request.user.person.role == "student" or request.user.person.role == "inspector":
         request.session['error_page_title'] = 'No permission'
         request.session['error_page_content'] = 'You have no permission to view this page'
@@ -154,9 +245,11 @@ def form_disapproved(request, form_id):
     return render(request, 'web/form/form_disapproved.html', {})
 
 
-def form_deleted(request, form_id):
+def form_deleted(request, form_id):  # TODO
     if not request.user.is_authenticated:
         return render(request, 'web/mains/main_nologin.html', {})
+    elif request.user.person.role != "student" and request.user.person.approved is False:
+        return redirect(not_approved)
     elif request.user.person.role != "student" and request.user.person.role != "inspector":
         request.session['error_page_title'] = 'No permission'
         request.session['error_page_content'] = 'You have no permission to view this page'
@@ -168,6 +261,8 @@ def form_deleted(request, form_id):
 def person_approved(request, person_id):
     if not request.user.is_authenticated:
         return render(request, 'web/mains/main_nologin.html', {})
+    elif request.user.person.role != "student" and request.user.person.approved is False:
+        return redirect(not_approved)
     elif request.user.person.role == "student":
         request.session['error_page_title'] = 'No permission'
         request.session['error_page_content'] = 'You have no permission to view this page'
@@ -182,6 +277,8 @@ def person_approved(request, person_id):
 def person_deleted(request, person_id):
     if not request.user.is_authenticated:
         return render(request, 'web/mains/main_nologin.html', {})
+    elif request.user.person.role != "student" and request.user.person.approved is False:
+        return redirect(not_approved)
     elif request.user.person.role == "student":
         request.session['error_page_title'] = 'No permission'
         request.session['error_page_content'] = 'You have no permission to view this page'
@@ -195,6 +292,8 @@ def person_deleted(request, person_id):
 def password_changed(request, person_id):
     if not request.user.is_authenticated:
         return render(request, 'web/mains/main_nologin.html', {})
+    elif request.user.person.role != "student" and request.user.person.approved is False:
+        return redirect(not_approved)
     elif request.user.person.role != "inspector":
         request.session['error_page_title'] = 'No permission'
         request.session['error_page_content'] = 'You have no permission to view this page'
@@ -222,6 +321,8 @@ def password_changed(request, person_id):
 def role_changed(request, person_id):
     if not request.user.is_authenticated:
         return render(request, 'web/mains/main_nologin.html', {})
+    elif request.user.person.role != "student" and request.user.person.approved is False:
+        return redirect(not_approved)
     elif request.user.person.role != "inspector":
         request.session['error_page_title'] = 'No permission'
         request.session['error_page_content'] = 'You have no permission to view this page'
@@ -321,6 +422,10 @@ def about(request):
 
 def error_general(request):
     return render(request, 'web/error_general.html', {})
+
+
+def error_form(request):
+    return render(request, 'web/error_form.html', {})
 
 
 def error_404(request):

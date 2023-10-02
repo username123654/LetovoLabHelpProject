@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-orxn2$ht=k2=&v306_b7gvujci0k&5c2^mpziw76l%^ugucg=^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'letovolabhelp.pythonanywhere.com']
 
